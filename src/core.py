@@ -40,7 +40,10 @@ def setup(mode):
     # Initialize word_state with underscores
     if word_state == []:
         for i in current_word:
-            word_state.append("_")
+            if i == " ":
+                word_state.append(" ")
+            else:
+                word_state.append("_")
 
 def choose_word() -> str:
     """
@@ -90,6 +93,8 @@ def guess_letters(letter):
     for i in current_word.upper():
         if i in guessed_letters:
             word_state.append(i)
+        elif i == " ":
+            word_state.append(" ")
         else:
             word_state.append("_")
 
