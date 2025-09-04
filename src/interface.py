@@ -100,14 +100,15 @@ class Game:
                 if clicked_letter:
                     core.guess_letters(clicked_letter)
                     self.word_state = core.word_state
-                    self.underscores = components.Underscores(self.word_state, font)
                     self.life_remaining = core.life_remaining
 
                     if self.life_remaining <= 0:
+                        core.game_over()
                         self.state = core.GAMEOVER
 
             # Handle escape key to return to menu
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            core.game_over()
             self.state = core.MENU
             self.letter_buttons.empty()
             self.mistakes = 0
@@ -124,6 +125,7 @@ class Game:
             # Update mistakes based on core.life_remaining
             self.mistakes = 6 - core.life_remaining
             self.timeout = str(core.timeout)
+            self.underscores = components.Underscores(self.word_state, font)
 
     def draw(self, surface):
 
@@ -200,6 +202,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            core.timer.cancel()
 
         game.handle_events(event)
 

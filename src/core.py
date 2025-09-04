@@ -22,7 +22,7 @@ timer = None
 def setup(mode):
     global current_word
     global word_state
-    
+
     start_timer(15)
 
     if mode == "basic":
@@ -57,7 +57,7 @@ def guess_letters(letter):
     global word_state
     global guessed_letters
     global life_remaining
-    
+
     reset_timer(15)
 
     word_state = []
@@ -75,9 +75,11 @@ def guess_letters(letter):
 
     print("From Core: ", word_state)
 
+
 def reduce_life():
     global life_remaining
     life_remaining -= 1
+
 
 def start_timer(seconds):
     global timer, timeout
@@ -87,17 +89,28 @@ def start_timer(seconds):
     timeout = seconds
     countdown()
 
+
 def countdown():
     global timer, timeout
     print(timeout)
-    
+
     timeout -= 1
-    if timeout >=1: 
+    if timeout >= 1:
         timer = threading.Timer(1.0, countdown)
         timer.start()
     else:
         reduce_life()
 
+
+def game_over():
+    global timeout, guessed_letters, mistakes, current_word, word_state, life_remaining
+
+    timeout = 0
+    guessed_letters = []
+    mistakes = 0
+    current_word = ""
+    word_state = []
+    life_remaining = 6
 
 def reset_timer(seconds):
     start_timer(seconds)
