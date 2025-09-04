@@ -81,38 +81,6 @@ class ScrabbleLetterSheet:
         self.letters = {}
         self.load_letters_from_scrabble_sheet()
 
-    def get_letter_points(self, letter):
-        """Get Scrabble point values for letters"""
-        points_map = {
-            "A": 1,
-            "B": 3,
-            "C": 3,
-            "D": 2,
-            "E": 1,
-            "F": 4,
-            "G": 2,
-            "H": 4,
-            "I": 1,
-            "J": 8,
-            "K": 5,
-            "L": 1,
-            "M": 3,
-            "N": 1,
-            "O": 1,
-            "P": 3,
-            "Q": 10,
-            "R": 1,
-            "S": 1,
-            "T": 1,
-            "U": 1,
-            "V": 4,
-            "W": 4,
-            "X": 8,
-            "Y": 4,
-            "Z": 10,
-        }
-        return points_map.get(letter, 1)
-
     def load_letters_from_scrabble_sheet(self):
         """Load letters from the Scrabble-style spritesheet"""
         # Assuming your spritesheet has 8 columns and 4 rows (26 letters + 6 empty spaces)
@@ -171,3 +139,39 @@ class HangmanSprites:
         """Get hangman frame based on number of mistakes (0-7)"""
         frame_index = min(mistakes, len(self.frames) - 1)
         return self.frames[frame_index] if self.frames else None
+
+class Underscores: 
+    
+    def __init__(self, word, font) -> None:
+        self.word = word
+        self.font = font
+        self.spacing = 30
+        pass
+    
+    def draw_underscores(self, surface):
+        i = 1
+        for letter in self.word:
+            text_surface = self.font.render(letter, True, (255, 255, 255))
+            text_rectangle = text_surface.get_rect(center=(350 + i * self.spacing, 600))
+            surface.blit(text_surface, text_rectangle)
+            i += 1
+
+class GameOverScreen:
+    def __init__(self, font_large, font, SCREEN_HEIGHT, SCREEN_WIDTH) -> None:
+        self.game_over_text = font_large.render("Game Over!", True, "white")
+        self.press_key_text = font.render("Press ESC to jump to main menu", True, "white")
+
+        # Get the rectangular areas of the rendered text to position them.
+        self.game_over_rect = self.game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+        self.press_key_rect = self.press_key_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+    
+    def draw(self, screen):
+        screen.blit(self.game_over_text, self.game_over_rect)
+        screen.blit(self.press_key_text, self.press_key_rect)
+
+class Countdown:
+    def __init__(self, font, text) -> None:
+        self.count_down_text = font.render(text, True, "white")
+        self.count_down_text_rect = self.count_down_text.get_rect(center=(300, 300))
+    def draw(self, screen):
+        screen.blit(self.count_down_text, self.count_down_text_rect)

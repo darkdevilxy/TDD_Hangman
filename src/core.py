@@ -1,36 +1,103 @@
 import random
+import threading
+import time
 
 words = []
+phrases = []
+
+MENU = "menu"
+GAME = "game"
+GAMEOVER = "gameover"
+life_remaining = 6
+guessed_letters = []
+wrong_letters = []
+mistakes = 0
+current_word = ""
+word_state = []
+timeout = 0
+
+timer = None
 
 
-class Engine:
-    def __init__(self) -> None:
-        pass
+def setup(mode):
+    global current_word
+    global word_state
     
-    def setup(self, mode):
-        if mode == "basic":
-            word = self.choose_word()
-        elif mode == "intermediate":
-            phrase = self.choose_phrase()
+    start_timer(15)
 
-    def choose_word(self) -> str:
-        if words == []:
-            with open("./datasets/cleaned_data.txt", "r") as f:
-                for data in f:
-                    words.append(data.strip())
-        random_number = random.randrange(0, len(words) - 1)
-        return words[random_number]
+    if mode == "basic":
+        current_word = choose_word()
+    elif mode == "intermediate":
+        current_word = choose_phrase()
 
-    def choose_phrase(self) -> str:
-        return ""
+    if word_state == []:
+        for i in current_word:
+            word_state.append("_")
 
 
-class GameState:
-    MENU = "menu"
-    GAME = "game"
-    life_remaining = 1
-    guessed_letters = []
-    wrong_letters = []
-    timeout = 0
-    mode = "basic"
-    mistakes = 0
+def choose_word() -> str:
+    if words == []:
+        with open("./datasets/cleaned_data.txt", "r") as f:
+            for data in f:
+                words.append(data.strip())
+    random_number = random.randrange(0, len(words) - 1)
+    return words[random_number]
+
+
+def choose_phrase() -> str:
+    if phrases == []:
+        with open("./datasets/phrases.txt", "r") as f:
+            for data in f:
+                phrases.append(data.strip())
+    random_number = random.randrange(0, len(phrases) - 1)
+    return phrases[random_number]
+
+
+def guess_letters(letter):
+    global word_state
+    global guessed_letters
+    global life_remaining
+    
+    reset_timer(15)
+
+    word_state = []
+
+    guessed_letters.append(letter)
+
+    if letter not in current_word.upper():
+        life_remaining -= 1
+
+    for i in current_word.upper():
+        if i in guessed_letters:
+            word_state.append(i)
+        else:
+            word_state.append("_")
+
+    print("From Core: ", word_state)
+
+def reduce_life():
+    global life_remaining
+    life_remaining -= 1
+
+def start_timer(seconds):
+    global timer, timeout
+
+    if timer:
+        timer.cancel()
+    timeout = seconds
+    countdown()
+
+def countdown():
+    global timer, timeout
+    print(timeout)
+    
+    timeout -= 1
+    if timeout >=1: 
+        timer = threading.Timer(1.0, countdown)
+        timer.start()
+    else:
+        reduce_life()
+
+
+def reset_timer(seconds):
+    start_timer(seconds)

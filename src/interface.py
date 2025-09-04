@@ -13,10 +13,13 @@ pygame.display.set_caption("Hangman Game with Letter Selection")
 
 # Font for button text
 font = pygame.font.Font("./assets/font.ttf", 18)
+font_medium = pygame.font.Font("./assets/font.ttf", 24)
+font_large = pygame.font.Font("./assets/font.ttf", 30)
+
 
 class Game:
     def __init__(self):
-        self.state = core.GameState.MENU
+        self.state = core.MENU
         self.mode = None
         self.letter_sheet = components.ScrabbleLetterSheet(
             "./assets/letters.png"
@@ -26,8 +29,10 @@ class Game:
         )  # Your hangman spritesheet
         self.letter_buttons = pygame.sprite.Group()
         self.transition_timer = 0
-        self.mistakes = 0
-
+        self.mistakes = core.mistakes
+        self.word_state = core.word_state
+        self.life_remaining = core.life_remaining
+        self.timeout = str(core.timeout)
         # Menu buttons
         self.basic_button = components.Button(
             "./assets/button.svg",
@@ -43,12 +48,14 @@ class Game:
             "Intermediate",
             font,
         )
+        self.underscores = components.Underscores(self.word_state, font)
+        self.gameover = components.GameOverScreen(
+            font_large, font, SCREEN_HEIGHT, SCREEN_WIDTH
+        )
 
     def create_letter_buttons(self):
         self.letter_buttons.empty()
-
-        # Determine which letters to show based on mode
-        letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"  # First 13 letters
+        letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
         # Position letters on the right side in a grid
         start_x = SCREEN_WIDTH - 400
@@ -71,64 +78,58 @@ class Game:
 
     def handle_events(self, event):
 
-        if self.state == core.GameState.MENU:
+        if self.state == core.MENU:
             if self.basic_button.handle_event(event):
                 print("Basic Mode")
-                self.mode = "basic"
-                self.state = core.GameState.GAME
+                core.setup("basic")
+                self.state = core.GAME
                 self.create_letter_buttons()
                 self.transition_timer = 0
-                self.mistakes = 0  # Reset lives
 
             if self.intermediate_button.handle_event(event):
                 print("Intermediate Mode")
-                self.mode = "intermediate"
-                self.state = core.GameState.GAME
+                core.setup("intermediate")
+                self.state = core.GAME
                 self.create_letter_buttons()
                 self.transition_timer = 0
-                self.mistakes = 0  # Reset lives
 
-        elif self.state == core.GameState.GAME:
+        elif self.state == core.GAME:
             # Handle letter button clicks
             for button in self.letter_buttons:
                 clicked_letter = button.handle_event(event)
                 if clicked_letter:
-                    print(f"Letter {clicked_letter} clicked!")
-                    # Simulate wrong guess for demo (in real game, check against word)
-                    if clicked_letter in "XQZ":  # Simulate some wrong letters
-                        core.GameState.life_remaining -= 1
-                        self.mistakes = 6 - core.GameState.life_remaining
-                        print(
-                            f"Wrong! Lives remaining: {core.GameState.life_remaining}"
-                        )
+                    core.guess_letters(clicked_letter)
+                    self.word_state = core.word_state
+                    self.underscores = components.Underscores(self.word_state, font)
+                    self.life_remaining = core.life_remaining
 
-                        if core.GameState.life_remaining <= 0:
-                            print("Game Over!")
-                    else:
-                        print("Correct letter!")
+                    if self.life_remaining <= 0:
+                        self.state = core.GAMEOVER
 
             # Handle escape key to return to menu
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.state = core.GameState.MENU
-                self.letter_buttons.empty()
-                self.mistakes = 0
-                core.GameState.life_remaining = 6
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.state = core.MENU
+            self.letter_buttons.empty()
+            self.mistakes = 0
+            core.life_remaining = 6
 
     def update(self):
-        if self.state == core.GameState.MENU:
+        if self.state == core.MENU:
             self.basic_button.update()
             self.intermediate_button.update()
-        elif self.state == core.GameState.GAME:
+        elif self.state == core.GAME:
+            self.word_state = core.word_state
             self.letter_buttons.update()
             self.transition_timer += 1
-            # Update mistakes based on core.GameState.life_remaining
-            self.mistakes = 6 - core.GameState.life_remaining
+            # Update mistakes based on core.life_remaining
+            self.mistakes = 6 - core.life_remaining
+            self.timeout = str(core.timeout)
 
     def draw(self, surface):
 
         surface.fill((30, 30, 50))  # Dark blue background
 
-        if self.state == core.GameState.MENU:
+        if self.state == core.MENU:
             self.basic_button.draw(surface)
             self.intermediate_button.draw(surface)
 
@@ -146,8 +147,12 @@ class Game:
                 center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 200)
             )
             surface.blit(instruction_text, text_rect)
+        elif self.state == core.GAMEOVER:
+            self.gameover.draw(screen)
 
-        elif self.state == core.GameState.GAME:
+        elif self.state == core.GAME:
+
+            self.underscores.draw_underscores(surface)
             # Draw hangman on the left side
             hangman_frame = self.hangman_sprites.get_frame(self.mistakes)
             if hangman_frame:
@@ -157,12 +162,12 @@ class Game:
 
             # Draw game info
             mode_text = pygame.font.Font(None, 24).render(
-                f"Mode: {self.mode.capitalize()}", True, (255, 255, 255)
+                f"Mode: {self.mode}", True, (255, 255, 255)
             )
             surface.blit(mode_text, (20, 20))
 
             lives_text = pygame.font.Font(None, 24).render(
-                f"Lives: {core.GameState.life_remaining}", True, (255, 100, 100)
+                f"Lives: {core.life_remaining}", True, (255, 100, 100)
             )
             surface.blit(lives_text, (20, 50))
 
@@ -170,6 +175,10 @@ class Game:
                 f"Mistakes: {self.mistakes}/6", True, (255, 200, 100)
             )
             surface.blit(mistakes_text, (20, 80))
+            count_down_text = pygame.font.Font("./assets/font.ttf", 20).render(
+                self.timeout, True, "white"
+            )
+            surface.blit(count_down_text, (20, 110))
 
             # Instructions
             instruction_text = pygame.font.Font(None, 18).render(
@@ -179,18 +188,6 @@ class Game:
 
             # Draw letter buttons
             self.letter_buttons.draw(surface)
-
-            # Draw title for letter section
-            letter_title = pygame.font.Font(None, 24).render(
-                "Select Letters:", True, (255, 255, 255)
-            )
-            surface.blit(letter_title, (SCREEN_WIDTH - 280, 20))
-
-            # Demo instruction
-            demo_text = pygame.font.Font(None, 16).render(
-                "(X, Q, Z are 'wrong' for demo)", True, (150, 150, 150)
-            )
-            surface.blit(demo_text, (SCREEN_WIDTH - 280, SCREEN_HEIGHT - 50))
 
 
 # Initialize game
