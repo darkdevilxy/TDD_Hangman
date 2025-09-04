@@ -98,8 +98,6 @@ def guess_letters(letter):
         else:
             word_state.append("_")
 
-    print("From Core: ", word_state)
-
 def reduce_life():
     """
     Reduces the player's remaining lives by one.
@@ -125,7 +123,6 @@ def countdown():
     Reduces timeout every second and reduces life when time runs out.
     """
     global timer, timeout
-    print(timeout)
 
     timeout -= 1
     if timeout >= 1:
