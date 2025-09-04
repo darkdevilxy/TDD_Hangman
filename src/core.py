@@ -40,7 +40,7 @@ def choose_word() -> str:
         with open("./datasets/cleaned_data.txt", "r") as f:
             for data in f:
                 words.append(data.strip())
-    random_number = random.randrange(0, len(words) - 1)
+    random_number = random.randrange(0, len(words))
     return words[random_number]
 
 
@@ -49,7 +49,7 @@ def choose_phrase() -> str:
         with open("./datasets/phrases.txt", "r") as f:
             for data in f:
                 phrases.append(data.strip())
-    random_number = random.randrange(0, len(phrases) - 1)
+    random_number = random.randrange(0, len(phrases))
     return phrases[random_number]
 
 
