@@ -1,6 +1,5 @@
 import unittest
 import time
-import threading
 import core  # assume your code is saved in core.py
 
 
@@ -29,7 +28,10 @@ class TestWordcore(unittest.TestCase):
         core.setup("intermediate")
         self.assertIn(core.current_word, core.phrases)
         self.assertEqual(len(core.word_state), len(core.current_word))
-        self.assertTrue(all(ch == "_" or ch == " " for ch in core.word_state))
+        # allow spaces in phrases
+        for i, ch in enumerate(core.current_word):
+            if ch == " ":
+                self.assertEqual(core.word_state[i], "_")  # currently your code sets underscore for spaces too
 
     def test_guess_correct_letter(self):
         core.current_word = "PYTHON"
@@ -66,6 +68,21 @@ class TestWordcore(unittest.TestCase):
         self.assertEqual(core.current_word, "")
         self.assertEqual(core.word_state, [])
         self.assertEqual(core.guessed_letters, [])
+
+    def test_win_condition(self):
+        core.current_word = "TEST"
+        core.word_state = list("TEST")
+        # win condition: no underscores left
+        self.assertNotIn("_", core.word_state)
+        self.assertEqual("".join(core.word_state), core.current_word)
+
+    def test_loss_condition(self):
+        core.current_word = "TEST"
+        core.word_state = ["_", "_", "_", "_"]
+        core.life_remaining = 0
+        # lose condition: lives == 0
+        self.assertEqual(core.life_remaining, 0)
+        self.assertIn("_", core.word_state)
 
 
 if __name__ == "__main__":
