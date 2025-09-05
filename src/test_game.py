@@ -2,6 +2,7 @@ import unittest
 import time
 import core  # assume your code is saved in core.py
 
+
 # Test suite for the core Hangman game logic
 class TestWordcore(unittest.TestCase):
 
@@ -33,10 +34,16 @@ class TestWordcore(unittest.TestCase):
         core.setup("intermediate")
         self.assertIn(core.current_word, core.phrases)
         self.assertEqual(len(core.word_state), len(core.current_word))
-        # allow spaces in phrases
+        # Spaces in the phrase should be revealed immediately.
         for i, ch in enumerate(core.current_word):
             if ch == " ":
-                self.assertEqual(core.word_state[i], "_")  # currently your code sets underscore for spaces too
+                self.assertEqual(
+                    core.word_state[i], " "
+                )  # Expecting a space, not an underscore
+            else:
+                self.assertEqual(
+                    core.word_state[i], "_"
+                )  # All other characters are underscores
 
     def test_guess_correct_letter(self):
         # Test guessing a correct letter updates word_state
@@ -75,19 +82,20 @@ class TestWordcore(unittest.TestCase):
         self.assertEqual(core.guessed_letters, [])
 
     def test_win_condition(self):
-        # Test win condition: word_state matches current_word
+        #word_state matches current_word
         core.current_word = "TEST"
         core.word_state = list("TEST")
         self.assertNotIn("_", core.word_state)
         self.assertEqual("".join(core.word_state), core.current_word)
 
     def test_loss_condition(self):
-        # Test loss condition: life_remaining is zero and word_state has underscores
+        # life_remaining is zero and word_state has underscores
         core.current_word = "TEST"
         core.word_state = ["_", "_", "_", "_"]
         core.life_remaining = 0
         self.assertEqual(core.life_remaining, 0)
         self.assertIn("_", core.word_state)
+
 
 if __name__ == "__main__":
     unittest.main()

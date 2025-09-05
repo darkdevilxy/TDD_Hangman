@@ -1,6 +1,18 @@
 import pygame
 import string
 
+def test_setup_intermediate(self):
+        # Test intermediate setup initializes phrase and state correctly
+        core.setup("intermediate")
+        self.assertIn(core.current_word, core.phrases)
+        self.assertEqual(len(core.word_state), len(core.current_word))
+        # Spaces in the phrase should be revealed immediately.
+        for i, ch in enumerate(core.current_word):
+            if ch == " ":
+                self.assertEqual(core.word_state[i], " ")  # Expecting a space, not an underscore
+            else:
+                self.assertEqual(core.word_state[i], "_") # All other characters are underscores
+
 # Button class for clickable UI buttons
 class Button(pygame.sprite.Sprite):
     def __init__(self, normal_img, clicked_img, pos, text, font):

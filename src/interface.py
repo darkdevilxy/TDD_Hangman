@@ -112,6 +112,12 @@ class Game:
                     core.guess_letters(clicked_letter)  # Update game logic with guessed letter
                     self.word_state = core.word_state
                     self.life_remaining = core.life_remaining
+                    if "_" not in self.word_state and self.life_remaining > 0:
+                        core.game_over()
+                        self.state = core.MENU
+                        self.letter_buttons.empty()
+                        self.mistakes = 0
+                        core.life_remaining = 6
 
                     # If no lives left, trigger game over
                     if self.life_remaining <= 0:

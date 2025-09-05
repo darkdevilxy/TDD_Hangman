@@ -22,6 +22,7 @@ timeout = 0
 
 timer = None
 
+
 def setup(mode):
     """
     Initializes the game based on the selected mode.
@@ -36,6 +37,7 @@ def setup(mode):
         current_word = choose_word()
     elif mode == "intermediate":
         current_word = choose_phrase()
+    print(current_word)
 
     # Initialize word_state with underscores
     if word_state == []:
@@ -44,6 +46,7 @@ def setup(mode):
                 word_state.append(" ")
             else:
                 word_state.append("_")
+
 
 def choose_word() -> str:
     """
@@ -57,6 +60,7 @@ def choose_word() -> str:
     random_number = random.randrange(0, len(words))
     return words[random_number]
 
+
 def choose_phrase() -> str:
     """
     Chooses a random phrase from the dataset.
@@ -68,6 +72,7 @@ def choose_phrase() -> str:
                 phrases.append(data.strip())
     random_number = random.randrange(0, len(phrases))
     return phrases[random_number]
+
 
 def guess_letters(letter):
     """
@@ -98,12 +103,14 @@ def guess_letters(letter):
         else:
             word_state.append("_")
 
+
 def reduce_life():
     """
     Reduces the player's remaining lives by one.
     """
     global life_remaining
     life_remaining -= 1
+
 
 def start_timer(seconds):
     """
@@ -116,6 +123,7 @@ def start_timer(seconds):
         timer.cancel()
     timeout = seconds
     countdown()
+
 
 def countdown():
     """
@@ -131,6 +139,7 @@ def countdown():
     else:
         reduce_life()
 
+
 def game_over():
     """
     Resets all game variables to their initial state.
@@ -143,6 +152,7 @@ def game_over():
     current_word = ""
     word_state = []
     life_remaining = 6
+
 
 def reset_timer(seconds):
     """
